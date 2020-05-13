@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Infovis2020 W02 Task3</title>
+    <style>
+        .container {
+            display: flex;
+        }
+    </style>
+    <script src="src/vec3.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const button_calc = document.getElementById("calc");
+            const span_result = document.getElementById("result");
+            // 計算ボタンを押した際の処理を登録
+            button_calc.addEventListener("click", event => {
+                const [v1, v2, v3] = [1, 2, 3]
+                    // 頂点ごとのinput要素のidを生成して値を取得
+                    .map(n =>
+                        ["x", "y", "z"]
+                            .map(dim => `v${n}_${dim}`)
+                            .map(id => +document.getElementById(id).value)
+                    )
+                    // 値から3つのベクトルを生成
+                    .map(components => (new Vec3(...components)));
+                // 結果を計算して表示
+                const result = Vec3.AreaOfTriangle(v1, v2, v3);
+                span_result.textContent = result.toString();
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <h1>W02 Task3</h1>
+    <div class="container">
+        <fieldset>
+            <legend>Vertex 1</legend>
+            <p>
+                <label for="v1_x">x:</label>
+                <input type="number" step="0.1" value="5" id="v1_x">
+            </p>
+            <p>
+                <label for="v1_y">y:</label>
+                <input type="number" step="0.1" value="4" id="v1_y">
+            </p>
+            <p>
+                <label for="v1_z">z:</label>
+                <input type="number" step="0.1" value="8" id="v1_z">
+            </p>
+        </fieldset>
+        <fieldset>
+            <legend>Vertex 2</legend>
+            <p>
+                <label for="v2_x">x:</label>
+                <input type="number" step="0.1" value="2" id="v2_x">
+            </p>
+            <p>
+                <label for="v2_y">y:</label>
+                <input type="number" step="0.1" value="1" id="v2_y">
+            </p>
+            <p>
+                <label for="v2_z">z:</label>
+                <input type="number" step="0.1" value="7" id="v2_z">
+            </p>
+        </fieldset>
+        <fieldset>
+            <legend>Vertex 3</legend>
+            <p>
+                <label for="v3_x">x:</label>
+                <input type="number" step="0.1" value="7" id="v3_x">
+            </p>
+            <p>
+                <label for="v3_y">y:</label>
+                <input type="number" step="0.1" value="5" id="v3_y">
+            </p>
+            <p>
+                <label for="v3_z">z:</label>
+                <input type="number" step="0.1" value="3" id="v3_z">
+            </p>
+        </fieldset>
+    </div>
+    <p>
+        <button type="button" id="calc">Calc Area of Triangle</button>
+    </p>
+    <p>result: <span id="result"></span></p>
+    <p><a href="https://github.com/Tatamo/infovis2020">GitHub repository</a></p>
+</body>
+
+</html>

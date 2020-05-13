@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Infovis2020 W02 Task2</title>
+    <script src="src/vec3.js"></script>
+    <script>
+        function getVectorFromInput() {
+            const [x, y, z] = ["v_x", "v_y", "v_z"]
+                .map(id => document.getElementById(id))
+                .map(elm => +elm.value);
+            return new Vec3(x, y, z);
+        }
+        function update() {
+            // 現在のmin, mid, maxの値を取得して表示
+            const span_min = document.getElementById("v_min");
+            const span_mid = document.getElementById("v_mid");
+            const span_max = document.getElementById("v_max");
+            const vec = getVectorFromInput();
+            span_min.textContent = vec.min().toString();
+            span_mid.textContent = vec.mid().toString();
+            span_max.textContent = vec.max().toString();
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            update();
+            // 入力フォームが更新された場合、再計算を行う
+            for (const input_id of ["v_x", "v_y", "v_z"]) {
+                const elm = document.getElementById(input_id);
+                elm.addEventListener("input", update);
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <h1>W02 Task2</h1>
+    <fieldset>
+        <legend>Vector v :=</legend>
+        <p>
+            <label for="v_x">x:</label>
+            <input type="number" step="0.1" value="5" id="v_x">
+        </p>
+        <p>
+            <label for="v_y">y:</label>
+            <input type="number" step="0.1" value="4" id="v_y">
+        </p>
+        <p>
+            <label for="v_z">z:</label>
+            <input type="number" step="0.1" value="8" id="v_z">
+        </p>
+    </fieldset>
+    <ul>
+        <li>the min value of components of v is: <span id="v_min"></span></li>
+        <li>the mid value of components of v is: <span id="v_mid"></span></li>
+        <li>the max value of components of v is: <span id="v_max"></span></li>
+    </ul>
+    <p><a href="https://github.com/Tatamo/infovis2020">GitHub repository</a></p>
+</body>
+
+</html>
