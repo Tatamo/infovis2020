@@ -77,7 +77,7 @@ class Vec3 {
 	 * @returns {number}
 	 */
 	mid() {
-		return this.components.sort((a, b) => a - b)[1];
+		return [...this.components].sort((a, b) => a - b)[1];
 	}
 
 	/**
