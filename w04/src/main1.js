@@ -16,17 +16,16 @@ function main() {
 	renderer.setSize(width, height);
 	document.body.appendChild(renderer.domElement);
 
-	// const geometry = new THREE.BoxGeometry(1, 1, 1);
 	const geometry = new THREE.Geometry();
 
 	const box_vertices = [
 		[-1, -1, -1],
-		[1, -1, -1],
-		[-1, 1, -1],
 		[-1, -1, 1],
-		[1, 1, -1],
-		[1, -1, 1],
+		[-1, 1, -1],
 		[1, -1, -1],
+		[-1, 1, 1],
+		[1, -1, 1],
+		[1, 1, -1],
 		[1, 1, 1]
 	].map(v => new THREE.Vector3().fromArray(v));
 	geometry.vertices.push(...box_vertices);
@@ -34,7 +33,16 @@ function main() {
 	const faces = [
 		[0, 1, 2],
 		[0, 2, 3],
-		[0, 3, 1]
+		[0, 3, 1],
+		[3, 2, 6],
+		[1, 3, 5],
+		[2, 1, 4],
+		[6, 5, 3],
+		[4, 6, 2],
+		[5, 4, 1],
+		[4, 5, 7],
+		[5, 6, 7],
+		[6, 4, 7]
 	].map(f => {
 		const face = new THREE.Face3(...f);
 		face.color = new THREE.Color(1, 0, 0);
@@ -51,7 +59,7 @@ function main() {
 	scene.add(cube);
 
 	const light = new THREE.PointLight(0xffffff);
-	light.position.set(1, 1, 1);
+	light.position.set(2, 2, 2);
 	scene.add(light);
 
 	loop();
