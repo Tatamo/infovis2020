@@ -10,3 +10,7 @@ Submissions for my lecture
 - Week03
   - [task1](https://tatamo.github.io/infovis2020/w03/task1.html)
   - [task2](https://tatamo.github.io/infovis2020/w03/task2.html)
+
+- Week04
+  - [task1](https://tatamo.github.io/infovis2020/w04/task1.html)
+  - [task2](https://tatamo.github.io/infovis2020/w04/task2.html)
