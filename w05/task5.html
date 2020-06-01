@@ -1,0 +1,85 @@
+<html>
+
+<head>
+    <title>Infovis2020 W05 Task5</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+
+    <script type="x-shader/x-vertex" id="shader.vert">
+        varying vec3 point_color;
+        varying vec4 point_position;
+        varying vec3 normal_vector;
+        varying vec3 light_position;
+        uniform bool edge;
+        vec3 LambertianReflection(vec3 C, vec3 L, vec3 N)
+        {
+            float ka = 0.4;
+            float kd = 0.6;
+            
+            float dd = max(dot(N, L), 0.0);
+            return C * (ka + kd * dd);
+        }
+        void main()
+        {
+            vec3 pos = position;
+            if(edge) {
+                // rendering of edge mesh
+                // make the mesh a little bit fatty
+                pos += normal * 0.05;
+            }
+            point_position = modelViewMatrix * vec4(pos, 1.0);
+            normal_vector = normalMatrix * normal;
+            vec3 C = color;
+            vec3 L = normalize(light_position - point_position.xyz);
+            vec3 N = normalize(normal_vector);
+            point_color = LambertianReflection(C, L, N);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+    </script>
+
+    <script type="x-shader/x-fragment" id="shader.frag">
+        varying vec3 point_color;
+        varying vec4 point_position;
+        varying vec3 normal_vector;
+        varying vec3 light_position;
+        uniform bool edge;
+        vec3 StepColorMap(vec3 L, vec3 N)
+        {
+            float ka = 0.4;
+            float kd = 0.6;
+            
+            float dd = max(dot(N, L), 0.0);
+            float k = (ka + kd * dd);
+
+            // clip gradation step-by-step
+            float a;
+            if(k < 0.8) a = 0.8;
+            else if(k < 0.9) a = 0.9;
+            else a = 1.0;
+            return vec3(1.0, 1.0, 1.0) * a;
+        }
+        void main()
+        {
+            if(edge) {
+                gl_FragColor = vec4( point_color, 1.0 );
+            }
+            else {
+                vec3 L = normalize(light_position - point_position.xyz);
+                vec3 N = normalize(normal_vector);
+    
+                vec3 shaded_color = point_color * StepColorMap(L, N);
+                gl_FragColor = vec4(shaded_color, 1.0);
+            }
+        }
+    </script>
+    <script src="src/main5.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", main);
+    </script>
+</head>
+
+<body>
+    <div id="container"></div>
+    <p><a href="https://github.com/Tatamo/infovis2020">GitHub repository</a></p>
+</body>
+
+</html>

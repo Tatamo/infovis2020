@@ -13,7 +13,6 @@
         {
             point_position = modelViewMatrix * vec4(position, 1.0);
             normal_vector = normalMatrix * normal;
-            vec3 C = color;
             point_color = color;
             gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
         }
