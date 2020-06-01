@@ -25,7 +25,7 @@
             vec3 L = normalize(light_position - point_position.xyz);
             vec3 N = normalize(normal_vector);
             point_color = LambertianReflection(C, L, N);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     </script>
 
@@ -34,7 +34,7 @@
         varying vec4 point_position;
         varying vec3 normal_vector;
         varying vec3 light_position;
-        vec3 PhongReflection( vec3 C, vec3 L, vec3 N )
+        vec3 PhongReflection(vec3 C, vec3 L, vec3 N)
         {
             float ka = 0.3;
             float kd = 0.5;
@@ -59,7 +59,7 @@
             vec3 L = normalize(light_position - point_position.xyz);
             vec3 N = normalize(normal_vector);
             point_color = PhongReflection(C, L, N);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     </script>
 
