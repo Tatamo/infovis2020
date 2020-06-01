@@ -1,5 +1,5 @@
 function main() {
-	const width = 500;
+	const width = 800;
 	const height = 500;
 
 	const scene = new THREE.Scene();
@@ -21,21 +21,40 @@ function main() {
 	document.getElementById("container").appendChild(renderer.domElement);
 
 	const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 20);
-	const material = new THREE.ShaderMaterial({
+	const material_l = new THREE.ShaderMaterial({
 		vertexColors: THREE.VertexColors,
-		vertexShader: document.getElementById('shader.vert').text,
+		vertexShader: document.getElementById('shader.vert.lambertian').text,
 		fragmentShader: document.getElementById('shader.frag').text,
+		uniforms: {
+			light_position: { type: 'v3', value: light.position }
+		}
 	});
 
-	const torus_knot = new THREE.Mesh(geometry, material);
-	scene.add(torus_knot);
+	const torus_knot_l = new THREE.Mesh(geometry, material_l);
+	torus_knot_l.position.set(-1.5,0,0)
+	scene.add(torus_knot_l);
+
+	const material_p = new THREE.ShaderMaterial({
+		vertexColors: THREE.VertexColors,
+		vertexShader: document.getElementById('shader.vert.phong').text,
+		fragmentShader: document.getElementById('shader.frag').text,
+		uniforms: {
+			light_position: { type: 'v3', value: light.position }
+		}
+	});
+
+	const torus_knot_p = new THREE.Mesh(geometry, material_p);
+	torus_knot_p.position.set(1.5,0,0)
+	scene.add(torus_knot_p);
 
 	loop();
 
 	function loop() {
 		requestAnimationFrame(loop);
-		torus_knot.rotation.x += 0.01;
-		torus_knot.rotation.y += 0.01;
+		torus_knot_l.rotation.x += 0.01;
+		torus_knot_l.rotation.y += 0.01;
+		torus_knot_p.rotation.x += 0.01;
+		torus_knot_p.rotation.y += 0.01;
 		renderer.render(scene, camera);
 	}
 }
