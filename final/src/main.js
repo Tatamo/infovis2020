@@ -9,15 +9,10 @@ function createColorMapWhiteRed(length) {
 }
 
 function BoundingBoxGeometry(volume) {
-	var minx = volume.min_coord.x;
-	var miny = volume.min_coord.y;
-	var minz = volume.min_coord.z;
+	const { x: minx, y: miny, z: minz } = volume.min_coord;
+	const { x: maxx, y: maxy, z: maxz } = volume.max_coord
 
-	var maxx = volume.max_coord.x;
-	var maxy = volume.max_coord.y;
-	var maxz = volume.max_coord.z;
-
-	var vertices = [
+	const vertices = [
 		[minx, miny, minz], // 0
 		[maxx, miny, minz], // 1
 		[maxx, miny, maxz], // 2
@@ -26,9 +21,9 @@ function BoundingBoxGeometry(volume) {
 		[maxx, maxy, minz], // 5
 		[maxx, maxy, maxz], // 6
 		[minx, maxy, maxz] // 7
-	];
+	].map(v => new THREE.Vector3().fromArray(v));
 
-	var faces = [
+	const faces = [
 		[0, 1, 2], // f0
 		[0, 2, 3], // f1
 		[7, 6, 5], // f2
@@ -41,37 +36,24 @@ function BoundingBoxGeometry(volume) {
 		[3, 6, 7], // f9
 		[0, 3, 7], // f10
 		[0, 7, 4], // f11
-	];
+	].map(f => new THREE.Face3(...f));
 
-	var geometry = new THREE.Geometry();
-
-	var nvertices = vertices.length;
-	for (var i = 0; i < nvertices; i++) {
-		var vertex = new THREE.Vector3().fromArray(vertices[i]);
-		geometry.vertices.push(vertex);
-	}
-
-	var nfaces = faces.length;
-	for (var i = 0; i < nfaces; i++) {
-		var id = faces[i];
-		var face = new THREE.Face3(id[0], id[1], id[2]);
-		geometry.faces.push(face);
-	}
-
+	const geometry = new THREE.Geometry();
+	geometry.vertices.push(...vertices);
+	geometry.faces.push(...faces);
 	geometry.doubleSided = true;
-
 	return geometry;
 }
 
 function VolumeTexture(volume) {
-	var width = volume.resolution.x * volume.resolution.z;
-	var height = volume.resolution.y;
-	var data = new Uint8Array(width * height);
-	for (var z = 0, index = 0; z < volume.resolution.z; z++) {
-		for (var y = 0; y < volume.resolution.y; y++) {
-			for (var x = 0; x < volume.resolution.x; x++ , index++) {
-				var u = volume.resolution.x * z + x;
-				var v = y;
+	const width = volume.resolution.x * volume.resolution.z;
+	const height = volume.resolution.y;
+	const data = new Uint8Array(width * height);
+	for (let z = 0, index = 0; z < volume.resolution.z; z++) {
+		for (let y = 0; y < volume.resolution.y; y++) {
+			for (let x = 0; x < volume.resolution.x; x++ , index++) {
+				const u = volume.resolution.x * z + x;
+				const v = y;
 				data[width * v + u] = volume.values[index][0];
 			}
 		}
@@ -98,7 +80,6 @@ function TransferFunctionTexture() {
 	var cmap = createColorMapWhiteRed(256);
 	for (var i = 0; i < resolution; i++) {
 		var color = cmap[i][1];
-		console.log(color);
 		var alpha = i / 255.0;
 		data[4 * i + 0] = color.r;
 		data[4 * i + 1] = color.g;
@@ -119,9 +100,33 @@ function TransferFunctionTexture() {
 	return texture;
 }
 
+class DatProperties {
+	first_hit_threshold = 0.5;
+	blinn_phong_reflection_enable = true;
+	dt = 0.5;
+	getUniformsObject() {
+		return {
+			first_hit_threshold: {
+				type: "float",
+				value: this.first_hit_threshold
+			},
+			blinn_phong_reflection_enable: {
+				type: "bool",
+				value: this.blinn_phong_reflection_enable
+			},
+			dt: {
+				type: "float",
+				value: this.dt
+			}
+		}
+	}
+}
+
 function main() {
-	var volume = new KVS.LobsterData();
-	var screen = new KVS.THREEScreen();
+	const properties = new DatProperties();
+
+	const volume = new KVS.LobsterData();
+	const screen = new KVS.THREEScreen();
 
 	screen.init(volume, {
 		width: window.innerWidth,
@@ -129,14 +134,8 @@ function main() {
 		enableAutoResize: false
 	});
 
-	//    screen.dynamicDampingFactor = 0.3;
-	//    screen.trackball.rotatetSpeed = 1.0;
-	//    screen.trackball.noPan = false;
-	//    screen.trackball.noZoom = false;
-	//    screen.renderer.setClearColor( new THREE.Color( "black" ) );
-
-	var exit_buffer = new THREE.Scene();
-	var exit_texture = new THREE.WebGLRenderTarget(
+	const exit_buffer = new THREE.Scene();
+	const exit_texture = new THREE.WebGLRenderTarget(
 		screen.width, screen.height,
 		{
 			minFilter: THREE.LinearFilter,
@@ -149,20 +148,20 @@ function main() {
 		}
 	);
 
-	var bounding_geometry = BoundingBoxGeometry(volume);
-	var volume_texture = VolumeTexture(volume);
-	var transfer_function_texture = TransferFunctionTexture();
+	const bounding_geometry = BoundingBoxGeometry(volume);
+	const volume_texture = VolumeTexture(volume);
+	const transfer_function_texture = TransferFunctionTexture();
 
-	var bounding_material = new THREE.ShaderMaterial({
+	const bounding_material = new THREE.ShaderMaterial({
 		vertexShader: document.getElementById('bounding.vert').textContent,
 		fragmentShader: document.getElementById('bounding.frag').textContent,
 		side: THREE.BackSide
 	});
 
-	var bounding_mesh = new THREE.Mesh(bounding_geometry, bounding_material);
+	const bounding_mesh = new THREE.Mesh(bounding_geometry, bounding_material);
 	exit_buffer.add(bounding_mesh);
 
-	var raycaster_material = new THREE.ShaderMaterial({
+	const raycaster_material = new THREE.ShaderMaterial({
 		vertexShader: document.getElementById('raycaster.vert').textContent,
 		fragmentShader: document.getElementById('raycaster.frag').textContent,
 		side: THREE.FrontSide,
@@ -171,9 +170,10 @@ function main() {
 			exit_points: { type: "t", value: exit_texture },
 			volume_data: { type: "t", value: volume_texture },
 			transfer_function_data: { type: "t", value: transfer_function_texture },
-			light_position: { type: 'v3', value: screen.light.position },
-			camera_position: { type: 'v3', value: screen.camera.position },
-			background_color: { type: 'v3', value: new THREE.Vector3().fromArray(screen.renderer.getClearColor().toArray()) },
+			light_position: { type: "v3", value: screen.light.position },
+			camera_position: { type: "v3", value: screen.camera.position },
+			background_color: { type: "v3", value: new THREE.Vector3().fromArray(screen.renderer.getClearColor().toArray()) },
+			...properties.getUniformsObject()
 		}
 	});
 
@@ -195,14 +195,16 @@ function main() {
 		screen.scene.updateMatrixWorld();
 		screen.trackball.handleResize();
 
-		/*
-		screen.renderer.setRenderTarget(exit_texture);
-		screen.renderer.clear();
-		screen.renderer.render(exit_buffer, screen.camera);
-		*/
-
 		screen.renderer.render(exit_buffer, screen.camera, exit_texture, true);
 		screen.renderer.render(screen.scene, screen.camera);
 		screen.trackball.update();
 	}
+
+	const gui = new dat.GUI();
+	gui.width = 400;
+	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties[prop_name];
+	gui.add(properties, "first_hit_threshold", 0, 1).onChange(updateUniform("first_hit_threshold")).name("first hit threshold");
+	gui.add(properties, "blinn_phong_reflection_enable").onChange(updateUniform("blinn_phong_reflection_enable")).name("enable shader refrection");
+	gui.add(properties, "dt", 0.1, 1).onChange(updateUniform("dt")).name("rendering sampling rate");
+
 }
