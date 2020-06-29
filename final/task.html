@@ -61,6 +61,8 @@
 	uniform float first_hit_threshold;
 	uniform bool blinn_phong_reflection_enable;
 	uniform float dt;
+	// 0: default, 1: first hit
+	uniform int mode;
 
 	vec4 LookupTexture2D( sampler2D texture, vec2 index ) {
 		return texture2D( texture, index );
@@ -133,8 +135,8 @@
 		vec3 position = entry_point;
 		vec4 color = vec4( 0.0, 0.0, 0.0, 0.0 );
 
-		if(1==0) {
-			// default
+		if(mode == 0) {
+			// accumulate
 			for ( int i = 0; i < 10000; i++ ) {
 				vec3 volume_index = vec3( ( position + vec3( 0.5 ) ) / volume_resolution );
 
@@ -168,7 +170,7 @@
 				if ( i > nsteps ) { break; }
 			}
 		}
-		else {
+		else if(mode == 1){
 			// first hit
 			for ( int i = 0; i < 10000; i++ ) {
 				vec3 volume_index = vec3( ( position + vec3( 0.5 ) ) / volume_resolution );

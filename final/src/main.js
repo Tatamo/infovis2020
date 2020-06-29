@@ -104,6 +104,7 @@ class DatProperties {
 	first_hit_threshold = 0.5;
 	blinn_phong_reflection_enable = true;
 	dt = 0.5;
+	mode = 0;
 	getUniformsObject() {
 		return {
 			first_hit_threshold: {
@@ -117,6 +118,10 @@ class DatProperties {
 			dt: {
 				type: "float",
 				value: this.dt
+			},
+			mode: {
+				type: "int",
+				value: this.mode
 			}
 		}
 	}
@@ -203,8 +208,9 @@ function main() {
 	const gui = new dat.GUI();
 	gui.width = 400;
 	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties[prop_name];
-	gui.add(properties, "first_hit_threshold", 0, 1).onChange(updateUniform("first_hit_threshold")).name("first hit threshold");
-	gui.add(properties, "blinn_phong_reflection_enable").onChange(updateUniform("blinn_phong_reflection_enable")).name("enable shader refrection");
-	gui.add(properties, "dt", 0.1, 1).onChange(updateUniform("dt")).name("rendering sampling rate");
-
+	const gui_add = (prop_name, ...params)=>gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
+	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
+	gui_add("dt", 0.1, 1).name("sampling rate");
+	gui_add("mode", {accumulate: 0, ["first hit"]: 1}).name("volume rendering mode");
+	gui_add("first_hit_threshold", 0, 1).name("first hit threshold");
 }
