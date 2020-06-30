@@ -1,21 +1,3 @@
-function createColorMapWhiteRed(length) {
-	return new Array(length).fill(null)
-		.map((_, index) => index / (length - 1))
-		.map(s => {
-			const color = new THREE.Color(1, 1 - s, 1 - s);
-			return [s, color];
-		});
-}
-function createColorMapRainbow(length) {
-	return new Array(length).fill(null)
-		.map((_, index) => index / (length - 1))
-		.map(s => {
-			const [R, G, B] = [-1, -0.5, 0].map(d => Math.max(Math.cos((s + d) * Math.PI), 0.0));
-			const color = new THREE.Color(R, G, B);
-			return [s, color];
-		});
-}
-
 function BoundingBoxGeometry(volume) {
 	const { x: minx, y: miny, z: minz } = volume.min_coord;
 	const { x: maxx, y: maxy, z: maxz } = volume.max_coord
@@ -109,17 +91,17 @@ function TransferFunctionTexture(cmap_generator) {
 }
 
 class DatProperties {
-	first_hit_threshold = 0.5;
+	first_hit_threshold = 0.65;
 	linear_interpolation = true;
 	blinn_phong_reflection_enable = true;
 	dt = 0.5;
-	mode = 2;
+	mode = 3;
 	transfer_function_data = 0;
 	getUniformsObject() {
 		return {
 			transfer_function_data: {
 				type: "t",
-				value: TransferFunctionTexture([createColorMapWhiteRed, createColorMapRainbow][this.transfer_function_data])
+				value: TransferFunctionTexture([createDivergingColorMapBlueRed, createColorMapWhiteRed, createColorMapRainbow][this.transfer_function_data])
 			},
 			first_hit_threshold: {
 				type: "float",
@@ -173,7 +155,6 @@ function main() {
 
 	const bounding_geometry = BoundingBoxGeometry(volume);
 	const volume_texture = VolumeTexture(volume);
-	const transfer_function_texture = TransferFunctionTexture(createColorMapWhiteRed);
 
 	const bounding_material = new THREE.ShaderMaterial({
 		vertexShader: document.getElementById('bounding.vert').textContent,
@@ -203,6 +184,16 @@ function main() {
 	var raycaster_mesh = new THREE.Mesh(bounding_geometry, raycaster_material);
 	screen.scene.add(raycaster_mesh);
 
+	const cmap = createDivergingColorMapBlueRed(256);
+	// Draw color map
+	const lut = new THREE.Lut('rainbow', cmap.length);
+	lut.addColorMap('mycolormap', cmap.map(([s, c]) => [s, `0x${c.getHexString()}`]));
+	lut.changeColorMap('mycolormap');
+	screen.scene.add(lut.setLegendOn({
+		'layout': 'horizontal',
+		'position': { 'x': 100, 'y': -10, 'z': 0 },
+		'dimensions': { 'width': 4, 'height': 20 }
+	}));
 	document.addEventListener('mousemove', function () {
 		screen.light.position.copy(screen.camera.position);
 	});
@@ -227,7 +218,7 @@ function main() {
 	gui.width = 400;
 	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties.getUniformsObject()[prop_name].value;
 	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
-	gui_add("transfer_function_data", { ["white to red"]: 0, ["rainbow colormap"]: 1 }).name("enable shader refrection");
+	gui_add("transfer_function_data", { ["white to red"]: 0, ["rainbow colormap"]: 1, ["diverging blue to red"]: 2 }).name("enable shader refrection");
 	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
 	gui_add("dt", 0.1, 1).name("sampling rate");
 	gui_add("mode", { accumulate: 0, ["raycast based isosurface"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode");

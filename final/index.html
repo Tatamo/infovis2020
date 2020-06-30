@@ -7,6 +7,7 @@
 <body style="margin:0">
 	<script src="lib/three.min.js"></script>
 	<script src="lib/TrackballControls.js"></script>
+	<script src="lib/Lut.js"></script>
 	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script> -->
 	<!-- <script src="https://threejs.org/examples/js/controls/TrackballControls.js"></script> -->
 	<script src="https://naohisas.github.io/KVS.js/Build/KVS.min.js"></script>
@@ -14,6 +15,7 @@
 	<!-- <script src="lib/KVS2THREE.js"></script> -->
 	<script src="https://naohisas.github.io/KVS.js/Source/KVSLobsterData.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+	<script src="lib/color.js"></script>
 
 	<script type="x-shader/x-vertex" id="bounding.vert">
 	 varying vec4 position_obj;
@@ -294,6 +296,7 @@
 	}
 	</script>
 
+	<script src="src/colormap.js"></script>
 	<script src="src/main.js"></script>
 	<script>
 		main();
