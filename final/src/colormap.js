@@ -66,6 +66,17 @@ function createDivergingColorMapBlueRed(length) {
 		})
 }
 
+function createDivergingColorMapGreenPurple(length) {
+	const start = RGB2Msh(0.085, 0.532, 0.201); // green in msh
+	const end = RGB2Msh(0.436, 0.308, 0.631); // purple in msh
+	return new Array(length).fill(null)
+		.map((_, index) => index / (length - 1))
+		.map(s => {
+			const msh = interpolateMshColor(start, end, s);
+			return [s, new THREE.Color(...Msh2RGB(...msh))];
+		})
+}
+
 function createColorMapWhiteRed(length) {
 	return new Array(length).fill(null)
 		.map((_, index) => index / (length - 1))

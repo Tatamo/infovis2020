@@ -101,7 +101,7 @@ class DatProperties {
 		return {
 			transfer_function_data: {
 				type: "t",
-				value: TransferFunctionTexture([createDivergingColorMapBlueRed, createColorMapWhiteRed, createColorMapRainbow][this.transfer_function_data])
+				value: TransferFunctionTexture([createDivergingColorMapBlueRed, createDivergingColorMapGreenPurple, createColorMapWhiteRed, createColorMapRainbow][this.transfer_function_data])
 			},
 			first_hit_threshold: {
 				type: "float",
@@ -218,7 +218,7 @@ function main() {
 	gui.width = 400;
 	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties.getUniformsObject()[prop_name].value;
 	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
-	gui_add("transfer_function_data", { ["diverging blue to red"]: 0, ["white to red"]: 1, ["rainbow colormap"]: 2 }).name("enable shader refrection");
+	gui_add("transfer_function_data", { ["diverging blue to red"]: 0, ["diverging green to purple"]: 1, ["white to red"]: 2, ["rainbow colormap"]: 3 }).name("enable shader refrection");
 	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
 	gui_add("dt", 0.1, 1).name("sampling rate");
 	gui_add("mode", { accumulate: 0, ["raycast based isosurface"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode");
