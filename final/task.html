@@ -63,6 +63,7 @@
 	uniform float dt;
 	// 0: default, 1: first hit
 	uniform int mode;
+	uniform bool linear_interpolation;
 
 	vec4 LookupTexture2D( sampler2D texture, vec2 index ) {
 		return texture2D( texture, index );
@@ -172,6 +173,7 @@
 		}
 		else if(mode == 1){
 			// first hit
+			vec4 prev_c = vec4( 0.0, 0.0, 0.0, 0.0 );
 			for ( int i = 0; i < 10000; i++ ) {
 				vec3 volume_index = vec3( ( position + vec3( 0.5 ) ) / volume_resolution );
 
@@ -182,13 +184,17 @@
 					vec3 offset_index = vec3( 1.0 ) / volume_resolution;
 					vec3 normal = VolumeGradient( volume_data, volume_resolution, volume_index, offset_index );
 
-					vec3 L = normalize( light_position - position );
-					vec3 N = normalize( normal );
-					vec3 V = normalize( camera_position - position );
+					if(blinn_phong_reflection_enable) {
+						vec3 L = normalize( light_position - position );
+						vec3 N = normalize( normal );
+						vec3 V = normalize( camera_position - position );
+						c.rgb = BlinnPhongReflection( c.rgb, L, N, V );
+					}
 					if(c.a > first_hit_threshold){
-						// for performance, apply reflection shader after check
-						if(blinn_phong_reflection_enable) {
-							c.rgb = BlinnPhongReflection( c.rgb, L, N, V );
+						if(linear_interpolation){
+							float k = (first_hit_threshold - prev_c.a)/(c.a - prev_c.a);
+							c.rgb = k * c.rgb + (1.0 - k) * prev_c.rgb;
+							c.a = k * c.a + (1.0-k) * prev_c.a;
 						}
 
 						color.rgb = c.rgb;
@@ -198,6 +204,7 @@
 				}
 
 				position += direction;
+				prev_c = c;
 
 				if ( i > nsteps ) { break; }
 			}

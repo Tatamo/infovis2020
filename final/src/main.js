@@ -102,14 +102,19 @@ function TransferFunctionTexture() {
 
 class DatProperties {
 	first_hit_threshold = 0.5;
+	linear_interpolation = true;
 	blinn_phong_reflection_enable = true;
 	dt = 0.5;
-	mode = 0;
+	mode = 1;
 	getUniformsObject() {
 		return {
 			first_hit_threshold: {
 				type: "float",
 				value: this.first_hit_threshold
+			},
+			linear_interpolation: {
+				type: "bool",
+				value: this.linear_interpolation
 			},
 			blinn_phong_reflection_enable: {
 				type: "bool",
@@ -213,4 +218,5 @@ function main() {
 	gui_add("dt", 0.1, 1).name("sampling rate");
 	gui_add("mode", {accumulate: 0, ["first hit"]: 1}).name("volume rendering mode");
 	gui_add("first_hit_threshold", 0, 1).name("first hit threshold");
+	gui_add("linear_interpolation").name("first hit linear interpolation");
 }
