@@ -95,7 +95,7 @@ class DatProperties {
 	linear_interpolation = true;
 	blinn_phong_reflection_enable = true;
 	dt = 0.5;
-	mode = 3;
+	mode = 2;
 	getUniformsObject() {
 		return {
 			first_hit_threshold: {
@@ -270,13 +270,13 @@ function main() {
 	const folder_volume_rendering = gui.addFolder("Volume Rendering");
 	folder_volume_rendering.open();
 	add(folder_volume_rendering, "dt", 0.1, 1).name("sampling rate");
-	const mode_change_option = folder_volume_rendering.add(properties, "mode", { accumulate: 0, ["raycast based isosurface"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode")
+	const mode_change_option = folder_volume_rendering.add(properties, "mode", { accumulate: 0, ["X-ray"]: 1, MIP: 2, ["raycast based isosurface"]: 3 }).name("volume rendering mode")
 	const folder_first_hit_params = folder_volume_rendering.addFolder("Isosurface Options");
-	mode_change_option.onChange(()=>{
+	mode_change_option.onChange(() => {
 		updateUniformProp("mode")();
-		if(+properties.getUniformsObject()["mode"].value === 1){
+		if (+properties.getUniformsObject()["mode"].value === 3) {
 			folder_first_hit_params.open();
-		} else{
+		} else {
 			folder_first_hit_params.close();
 		}
 	});
