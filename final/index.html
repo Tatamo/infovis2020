@@ -332,10 +332,10 @@
 		</li>
 	</ul>
 
-	<h2>Controlls</h2>
+	<h2>Controls</h2>
 	<p>
 		The interface avobe the webpage is implemented by <a href="https://github.com/dataarts/dat.gui">dat.gui</a>.
-		It contains some controlls around Colormap and Volume Rendering.
+		It contains some controls around Colormap and Volume Rendering.
 		In addition, we can toggle Blinn Phong Reflection shading (enable in default).
 	</p>
 
@@ -356,26 +356,26 @@
 		The full paper shows pseudo program code, so I translated it into JavaScript.
 	</p>
 	<p>
-		The controll provides 4 colormap options.
-		Two of them are the diverging colormap, descripted in the original paper.
-		For compalision, I added a RGB-based linear colormap (white to red) and a rainbow colormap.
+		The control provides 4 colormap options.
+		Two of them are the diverging colormap, described in the original paper.
+		For comparison, I added a RGB-based linear colormap (white to red) and a rainbow colormap.
 	</p>
 	<p>
 		In addition, I integrated the <a href="https://threejs.org/examples/webgl_geometry_colors_lookuptable">Lut</a>
-		colormap legend into the GUI interface, so that the in-3D-view colormap can be updated dinamically, according to
-		the selection in the controll.
+		colormap legend into the GUI interface, so that the in-3D-view colormap can be updated dynamically, according to
+		the selection in the control.
 	</p>
 
 	<h2>Volume Rendering</h2>
 	<p>
 		Volume Rendering splits the volumes in the way of raycasting.
-		The controll GUI has a option to change sampling rate.
+		The control GUI has a option to change sampling rate.
 		So we can confirm that the fine sampling (small value) makes the look better instead of the increasing of
 		computation cost.
 	</p>
 
 	<p>
-		There is a controll to change volume rendering mode.
+		There is a control to change volume rendering mode.
 		In addition to the default accumulate mode, we can switch to X-ray, MIP, and first-hit (raycast based
 		isosurface) modes.
 	</p>
@@ -402,7 +402,7 @@
 		It realizes raycast-based isosurface extraction.
 	</p>
 	<p>
-		The controll has 2 more options dedicated to this mode.
+		The control has 2 more options dedicated to this mode.
 	</p>
 	<p>
 		The "first hit threshold" option enables to change the first-hit threshold.
