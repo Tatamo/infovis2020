@@ -36,3 +36,6 @@ Submissions for my lecture
 
 - Week12
   - [task1](https://tatamo.github.io/infovis2020/w12/task1.html)
+
+- Final Task (Task2)
+  - [report](https://tatamo.github.io/infovis2020/final)

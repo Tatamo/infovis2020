@@ -301,6 +301,132 @@
 	<script>
 		main();
 	</script>
+
+	<h1>Information Visualization 2020 Final Task (T2: Algorithm Implementation)</h1>
+	<h2>Overview</h2>
+	<p>I implemented the follwing features.</p>
+	<ul>
+		<li>
+			Colormap
+			<ul>
+				<li>
+					Diverging Colormap Generation
+				</li>
+			</ul>
+		</li>
+		<li>
+			Volume Rendering
+			<ul>
+				<li>
+					X-Ray/MIP
+				</li>
+				<li>
+					First Hit(Raycast-based isosurface extraction)
+					<ul>
+						<li>
+							linear interpolation
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</li>
+	</ul>
+
+	<h2>Controlls</h2>
+	<p>
+		The interface avobe the webpage is implemented by <a href="https://github.com/dataarts/dat.gui">dat.gui</a>.
+		It contains some controlls around Colormap and Volume Rendering.
+		In addition, we can toggle Blinn Phong Reflection shading (enable in default).
+	</p>
+
+	<h2>Colormap</h2>
+	<p>
+		I implemented Diverging Colormap Generation algorithm, that is described in
+		<a href="https://www.kennethmoreland.com/color-maps/">https://www.kennethmoreland.com/color-maps/</a> and
+		<a href="https://www.kennethmoreland.com/color-maps/ColorMapsExpanded.pdf">
+			https://www.kennethmoreland.com/color-maps/ColorMapsExpanded.pdf</a>.
+	</p>
+	<p>
+		First, We have to convert a RGB color to Msh color, via CIE Lab color space.
+		I wrote the conversion function between Msh and CIE Lab, but I used
+		<a href="https://github.com/antimatter15/rgb-lab">rgb-lab</a> library to convert between RGB and CIE Lab.
+	</p>
+	<p>
+		Next, the interpolation function in Msh color space is needed.
+		The full paper shows pseudo program code, so I translated it into JavaScript.
+	</p>
+	<p>
+		The controll provides 4 colormap options.
+		Two of them is the diverging colormap, descripted in the original paper.
+		For compalision, I added a RGB-based linear colormap (white to red) and a rainbow colormap.
+	</p>
+	<p>
+		In addition, I integrated the <a href="https://threejs.org/examples/webgl_geometry_colors_lookuptable">Lut</a>
+		colormap legend into the GUI interface, so that the in-3D-view colormap can be updated dinamically, according to
+		the selection in the controll.
+	</p>
+
+	<h2>Volume Rendering</h2>
+	<p>
+		Volume Rendering splits the volumes in the way of raycasting.
+		The controll GUI has a option to change sampling rate.
+		So we can confirm that the fine sampling (small value) makes the look better instead of the increasing of
+		computation cost.
+	</p>
+
+	<p>
+		There is a controll to change volume rendering mode.
+		In addition to the default accumulate mode, we can switch to X-ray, MIP, and first-hit (raycast based
+		isosurface) modes.
+	</p>
+
+	<h3>X-ray/MIP</h3>
+	<p>
+		Both X-ray and MIP checks all the position in the way of ray.
+	</p>
+	<p>
+		In X-ray mode, the program sums all non-zero value in the path and finally divides the sum by the number of
+		non-zero values.
+		It looks like X-ray literally, we see through backward volumes.
+	</p>
+	<p>
+		In MIP mode, check all value and simply use the maximum value.
+		Like X-ray we can see through the inside of the object, but MIP shows the internal structure of the object more
+		clearly.
+	</p>
+
+	<h3>raycast based isosurface extraction</h3>
+	<p>
+		Lastly, I implemented first-hit (raycast based isosurface) volume rendering.
+		The first-hit volume rendering checks the value in the path, and pick the first value that is larger than a specific threshold value.
+		It realizes raycast-based isosurface extraction.
+	</p>
+	<p>
+		The controll has 2 more options dedicated to this mode.
+	</p>
+	<p>
+		The "first hit threshold" option enables to change the first-hit threshold.
+		By changing this value, we see various isosurfaces.
+	</p>
+	<p>
+		And I implemented a linear interpolation, to improve the first-hit algorithm.
+		In simple implementation of first-hit algorithm, striped pattern appears everywhere, especially when the sampling rate is not fine enough.
+		The improved program remembers the previous value in the path, and interpolate linearly between the two point around the threshold.
+		This algorithm significantly makes the model smooth, especially when the sampling rate is large.
+		We can check the effect of the interpolation to set large sampling rate (.75 or more) and toggle the interpolation checkbox.
+	</p>
+	
+	<h2>Result</h2>
+	<p>
+		I implemented algorithms around colormap and volume rendering.
+		And I integrated the UI so that we can confirm the effect of those algorithms.
+	</p>
+
+	<p>
+		If the program in this webpage does not work correctly, please use the latest version of Google Chrome.
+	</p>
+
+	<hr>
 	<p><a href="https://github.com/Tatamo/infovis2020">GitHub repository</a></p>
 	<p><a href="../">index</a></p>
 </body>
