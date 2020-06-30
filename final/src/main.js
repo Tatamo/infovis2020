@@ -96,13 +96,8 @@ class DatProperties {
 	blinn_phong_reflection_enable = true;
 	dt = 0.5;
 	mode = 3;
-	transfer_function_data = 0;
 	getUniformsObject() {
 		return {
-			transfer_function_data: {
-				type: "t",
-				value: TransferFunctionTexture([createDivergingColorMapBlueRed, createDivergingColorMapGreenPurple, createColorMapWhiteRed, createColorMapRainbow][this.transfer_function_data])
-			},
 			first_hit_threshold: {
 				type: "float",
 				value: this.first_hit_threshold
@@ -127,8 +122,59 @@ class DatProperties {
 	}
 }
 
+class ColorMapManager {
+	static DivergingBlueRed = 0;
+	static DivergingGreenPurple = 1;
+	static WhiteRed = 2;
+	static Rainbow = 3;
+	static ColorMapLength = 256;
+	static ColorMapGenerators = {
+		[ColorMapManager.DivergingBlueRed]: createDivergingColorMapBlueRed,
+		[ColorMapManager.DivergingGreenPurple]: createDivergingColorMapGreenPurple,
+		[ColorMapManager.WhiteRed]: createColorMapWhiteRed,
+		[ColorMapManager.Rainbow]: createColorMapRainbow
+	}
+
+	constructor() {
+		this._transfer_function_data = ColorMapManager.DivergingBlueRed;
+		this.lut = new THREE.Lut('rainbow', ColorMapManager.ColorMapLength);
+		for (const [key, gen] of Object.entries(ColorMapManager.ColorMapGenerators)) {
+			this.lut.addColorMap(key, gen(ColorMapManager.ColorMapLength).map(([s, c]) => [s, `0x${c.getHexString()}`]))
+		}
+		this.lut.changeColorMap(ColorMapManager.DivergingBlueRed);
+		this.legend = null;
+	}
+	get transfer_function_data() {
+		return this._transfer_function_data;
+	}
+	set transfer_function_data(value) {
+		this._transfer_function_data = value;
+		this.lut.changeColorMap(value);
+	}
+	updateLegend(scene) {
+		if (this.legend !== null) {
+			scene.remove(this.legend);
+		}
+		this.legend = this.lut.setLegendOn({
+			'layout': 'horizontal',
+			'position': { 'x': 100, 'y': -10, 'z': 0 },
+			'dimensions': { 'width': 4, 'height': 20 }
+		});
+		scene.add(this.legend);
+	}
+	getUniformsObject() {
+		return {
+			transfer_function_data: {
+				type: "t",
+				value: TransferFunctionTexture(ColorMapManager.ColorMapGenerators[this.transfer_function_data])
+			}
+		}
+	}
+}
+
 function main() {
 	const properties = new DatProperties();
+	const colormaps = new ColorMapManager();
 
 	const volume = new KVS.LobsterData();
 	const screen = new KVS.THREEScreen();
@@ -173,27 +219,17 @@ function main() {
 			volume_resolution: { type: "v3", value: volume.resolution },
 			exit_points: { type: "t", value: exit_texture },
 			volume_data: { type: "t", value: volume_texture },
-			// transfer_function_data: { type: "t", value: transfer_function_texture },
 			light_position: { type: "v3", value: screen.light.position },
 			camera_position: { type: "v3", value: screen.camera.position },
 			background_color: { type: "v3", value: new THREE.Vector3().fromArray(screen.renderer.getClearColor().toArray()) },
-			...properties.getUniformsObject()
+			...properties.getUniformsObject(),
+			...colormaps.getUniformsObject()
 		}
 	});
 
 	var raycaster_mesh = new THREE.Mesh(bounding_geometry, raycaster_material);
 	screen.scene.add(raycaster_mesh);
-
-	const cmap = createDivergingColorMapBlueRed(256);
-	// Draw color map
-	const lut = new THREE.Lut('rainbow', cmap.length);
-	lut.addColorMap('mycolormap', cmap.map(([s, c]) => [s, `0x${c.getHexString()}`]));
-	lut.changeColorMap('mycolormap');
-	screen.scene.add(lut.setLegendOn({
-		'layout': 'horizontal',
-		'position': { 'x': 100, 'y': -10, 'z': 0 },
-		'dimensions': { 'width': 4, 'height': 20 }
-	}));
+	colormaps.updateLegend(screen.scene);
 	document.addEventListener('mousemove', function () {
 		screen.light.position.copy(screen.camera.position);
 	});
@@ -216,9 +252,17 @@ function main() {
 
 	const gui = new dat.GUI();
 	gui.width = 400;
-	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties.getUniformsObject()[prop_name].value;
-	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
-	gui_add("transfer_function_data", { ["diverging blue to red"]: 0, ["diverging green to purple"]: 1, ["white to red"]: 2, ["rainbow colormap"]: 3 }).name("enable shader refrection");
+	const updateUniformProp = prop_name => () => raycaster_material.uniforms[prop_name].value = properties.getUniformsObject()[prop_name].value;
+	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniformProp(prop_name));
+	gui.add(colormaps, "transfer_function_data", {
+		["diverging blue to red"]: ColorMapManager.DivergingBlueRed,
+		["diverging green to purple"]: ColorMapManager.DivergingGreenPurple,
+		["white to red"]: ColorMapManager.WhiteRed,
+		["rainbow colormap"]: ColorMapManager.Rainbow
+	}).onChange(() => {
+		raycaster_material.uniforms["transfer_function_data"].value = colormaps.getUniformsObject().transfer_function_data.value;
+		colormaps.updateLegend(screen.scene);
+	}).name("enable shader refrection");
 	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
 	gui_add("dt", 0.1, 1).name("sampling rate");
 	gui_add("mode", { accumulate: 0, ["raycast based isosurface"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode");
