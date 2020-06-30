@@ -253,8 +253,12 @@ function main() {
 	const gui = new dat.GUI();
 	gui.width = 400;
 	const updateUniformProp = prop_name => () => raycaster_material.uniforms[prop_name].value = properties.getUniformsObject()[prop_name].value;
-	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniformProp(prop_name));
-	gui.add(colormaps, "transfer_function_data", {
+	const add = (gui, prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniformProp(prop_name));
+
+	add(gui, "blinn_phong_reflection_enable").name("enable shader refrection");
+	const folder_colormap = gui.addFolder("Colormap");
+	folder_colormap.open();
+	folder_colormap.add(colormaps, "transfer_function_data", {
 		["diverging blue to red"]: ColorMapManager.DivergingBlueRed,
 		["diverging green to purple"]: ColorMapManager.DivergingGreenPurple,
 		["white to red"]: ColorMapManager.WhiteRed,
@@ -262,10 +266,20 @@ function main() {
 	}).onChange(() => {
 		raycaster_material.uniforms["transfer_function_data"].value = colormaps.getUniformsObject().transfer_function_data.value;
 		colormaps.updateLegend(screen.scene);
-	}).name("enable shader refrection");
-	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
-	gui_add("dt", 0.1, 1).name("sampling rate");
-	gui_add("mode", { accumulate: 0, ["raycast based isosurface"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode");
-	gui_add("first_hit_threshold", 0, 1).name("first hit threshold");
-	gui_add("linear_interpolation").name("first hit linear interpolation");
+	}).name("change colormap");
+	const folder_volume_rendering = gui.addFolder("Volume Rendering");
+	folder_volume_rendering.open();
+	add(folder_volume_rendering, "dt", 0.1, 1).name("sampling rate");
+	const mode_change_option = folder_volume_rendering.add(properties, "mode", { accumulate: 0, ["raycast based isosurface"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode")
+	const folder_first_hit_params = folder_volume_rendering.addFolder("Isosurface Options");
+	mode_change_option.onChange(()=>{
+		updateUniformProp("mode")();
+		if(+properties.getUniformsObject()["mode"].value === 1){
+			folder_first_hit_params.open();
+		} else{
+			folder_first_hit_params.close();
+		}
+	});
+	add(folder_first_hit_params, "first_hit_threshold", 0, 1).name("first hit threshold");
+	add(folder_first_hit_params, "linear_interpolation").name("first hit linear interpolation");
 }
