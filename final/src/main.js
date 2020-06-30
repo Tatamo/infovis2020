@@ -105,7 +105,7 @@ class DatProperties {
 	linear_interpolation = true;
 	blinn_phong_reflection_enable = true;
 	dt = 0.5;
-	mode = 1;
+	mode = 2;
 	getUniformsObject() {
 		return {
 			first_hit_threshold: {
@@ -216,7 +216,7 @@ function main() {
 	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
 	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
 	gui_add("dt", 0.1, 1).name("sampling rate");
-	gui_add("mode", { accumulate: 0, ["first hit"]: 1, MIP: 2 }).name("volume rendering mode");
+	gui_add("mode", { accumulate: 0, ["first hit"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode");
 	gui_add("first_hit_threshold", 0, 1).name("first hit threshold");
 	gui_add("linear_interpolation").name("first hit linear interpolation");
 }
