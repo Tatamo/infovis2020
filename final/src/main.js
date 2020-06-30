@@ -213,10 +213,10 @@ function main() {
 	const gui = new dat.GUI();
 	gui.width = 400;
 	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties[prop_name];
-	const gui_add = (prop_name, ...params)=>gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
+	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
 	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
 	gui_add("dt", 0.1, 1).name("sampling rate");
-	gui_add("mode", {accumulate: 0, ["first hit"]: 1}).name("volume rendering mode");
+	gui_add("mode", { accumulate: 0, ["first hit"]: 1, MIP: 2 }).name("volume rendering mode");
 	gui_add("first_hit_threshold", 0, 1).name("first hit threshold");
 	gui_add("linear_interpolation").name("first hit linear interpolation");
 }
