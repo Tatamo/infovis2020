@@ -180,8 +180,8 @@ function main() {
 	const screen = new KVS.THREEScreen();
 
 	screen.init(volume, {
-		width: window.innerWidth,
-		height: window.innerHeight,
+		width: window.innerWidth - 32,
+		height: window.innerHeight * 0.9,
 		enableAutoResize: false
 	});
 
@@ -235,7 +235,7 @@ function main() {
 	});
 
 	window.addEventListener('resize', function () {
-		screen.resize([window.innerWidth, window.innerHeight]);
+		screen.resize([window.innerWidth - 32, window.innerHeight * 0.9]);
 	});
 
 	screen.loop();
