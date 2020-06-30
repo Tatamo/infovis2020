@@ -1,9 +1,17 @@
 function createColorMapWhiteRed(length) {
-	// Create color map
 	return new Array(length).fill(null)
 		.map((_, index) => index / (length - 1))
 		.map(s => {
 			const color = new THREE.Color(1, 1 - s, 1 - s);
+			return [s, color];
+		});
+}
+function createColorMapRainbow(length) {
+	return new Array(length).fill(null)
+		.map((_, index) => index / (length - 1))
+		.map(s => {
+			const [R, G, B] = [-1, -0.5, 0].map(d => Math.max(Math.cos((s + d) * Math.PI), 0.0));
+			const color = new THREE.Color(R, G, B);
 			return [s, color];
 		});
 }
@@ -72,12 +80,12 @@ function VolumeTexture(volume) {
 	return texture;
 }
 
-function TransferFunctionTexture() {
+function TransferFunctionTexture(cmap_generator) {
 	var resolution = 256;
 	var width = resolution;
 	var height = 1;
 	var data = new Float32Array(width * height * 4);
-	var cmap = createColorMapWhiteRed(256);
+	var cmap = cmap_generator(256);
 	for (var i = 0; i < resolution; i++) {
 		var color = cmap[i][1];
 		var alpha = i / 255.0;
@@ -106,8 +114,13 @@ class DatProperties {
 	blinn_phong_reflection_enable = true;
 	dt = 0.5;
 	mode = 2;
+	transfer_function_data = 0;
 	getUniformsObject() {
 		return {
+			transfer_function_data: {
+				type: "t",
+				value: TransferFunctionTexture([createColorMapWhiteRed, createColorMapRainbow][this.transfer_function_data])
+			},
 			first_hit_threshold: {
 				type: "float",
 				value: this.first_hit_threshold
@@ -160,7 +173,7 @@ function main() {
 
 	const bounding_geometry = BoundingBoxGeometry(volume);
 	const volume_texture = VolumeTexture(volume);
-	const transfer_function_texture = TransferFunctionTexture();
+	const transfer_function_texture = TransferFunctionTexture(createColorMapWhiteRed);
 
 	const bounding_material = new THREE.ShaderMaterial({
 		vertexShader: document.getElementById('bounding.vert').textContent,
@@ -179,7 +192,7 @@ function main() {
 			volume_resolution: { type: "v3", value: volume.resolution },
 			exit_points: { type: "t", value: exit_texture },
 			volume_data: { type: "t", value: volume_texture },
-			transfer_function_data: { type: "t", value: transfer_function_texture },
+			// transfer_function_data: { type: "t", value: transfer_function_texture },
 			light_position: { type: "v3", value: screen.light.position },
 			camera_position: { type: "v3", value: screen.camera.position },
 			background_color: { type: "v3", value: new THREE.Vector3().fromArray(screen.renderer.getClearColor().toArray()) },
@@ -212,11 +225,12 @@ function main() {
 
 	const gui = new dat.GUI();
 	gui.width = 400;
-	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties[prop_name];
+	const updateUniform = prop_name => () => raycaster_material.uniforms[prop_name].value = properties.getUniformsObject()[prop_name].value;
 	const gui_add = (prop_name, ...params) => gui.add(properties, prop_name, ...params).onChange(updateUniform(prop_name));
+	gui_add("transfer_function_data", { ["white to red"]: 0, ["rainbow colormap"]: 1 }).name("enable shader refrection");
 	gui_add("blinn_phong_reflection_enable").name("enable shader refrection");
 	gui_add("dt", 0.1, 1).name("sampling rate");
-	gui_add("mode", { accumulate: 0, ["first hit"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode");
+	gui_add("mode", { accumulate: 0, ["raycast based isosurface"]: 1, ["X-ray"]: 2, MIP: 3 }).name("volume rendering mode");
 	gui_add("first_hit_threshold", 0, 1).name("first hit threshold");
 	gui_add("linear_interpolation").name("first hit linear interpolation");
 }
